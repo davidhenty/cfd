@@ -1,0 +1,16 @@
+#!/bin/bash --login
+
+#PBS -l select=1
+#PBS -l walltime=00:05:00
+#PBS -A y14
+#PBS -N cfd
+
+#Change to directory that the job was submitted from
+cd $PBS_O_WORKDIR
+
+# Set the number of threads to 4
+
+export OMP_NUM_THREADS=4
+
+# Launch the parallel job
+aprun -n 1 -N 1 -d $OMP_NUM_THREADS ./cfd 4 5000

@@ -1,0 +1,23 @@
+#!/bin/bash --login
+
+# This is a PBS script for the Tier2 system Cirrus
+
+# PBS job options (name, compute nodes, job time)
+#PBS -A y15
+#PBS -N cfd
+#PBS -l walltime=00:01:00
+#PBS -l place=excl
+#PBS -l select=1:ncpus=72
+
+module load intel-compilers-17
+
+# Change to the directory that the job was submitted from
+# (remember this should be on the /work filesystem)
+cd $PBS_O_WORKDIR
+
+# Set the number of threads to 4
+
+export OMP_NUM_THREADS=4
+
+# Launch the parallel job
+./cfd 4 5000
