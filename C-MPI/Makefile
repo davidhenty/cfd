@@ -1,5 +1,5 @@
 # Set the target system
-# Can use either archer, cirrus or linux
+# Can use one of: archer, cirrus or linux
 
 SYSTEM=archer
 
