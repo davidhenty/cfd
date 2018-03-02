@@ -1,15 +1,33 @@
+# Set the target system
+# Can use either archer, cirrus or linux
+
+SYSTEM=archer
+
 # System dependent definitions
 
-# For ARCHER
+# For ARCHER - default
+
+ifeq ($(SYSTEM), archer)
 CC=	cc
 CFLAGS=
 LFLAGS=
+endif
 
-# For Cirrus or any standard Linux system
-#CC=	mpicc
-#CFLAGS=	-cc=icc -O3
-#LFLAGS=	-lm
+# For Cirrus using Intel compilers
 
+ifeq ($(SYSTEM), cirrus)
+CC=	mpicc
+CFLAGS=	-cc=icc -O3
+LFLAGS=	-lm
+endif
+
+# For a standard Linux cluster using GNU compilers
+
+ifeq ($(SYSTEM), linux)
+CC=	mpicc
+CFLAGS=	-O3
+LFLAGS=	-lm
+endif
 
 # System independent definitions
 
@@ -29,6 +47,11 @@ SRC= \
 	cfd.c \
 	cfdio.c \
 	jacobi.c
+
+OUT= \
+	velocity.dat \
+	colourmap.dat \
+	cfd.plt
 
 #
 # No need to edit below this line
@@ -55,4 +78,4 @@ tar:
 	tar cvf cfd.tar $(MF) $(INC) $(SRC)
 
 clean:
-	rm -f $(OBJ) $(EXE) velocity.dat colourmap.dat cfd.plt core
+	rm -f $(OBJ) $(EXE) $(OUT) core *~
