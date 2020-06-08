@@ -202,7 +202,7 @@ program cfd
   end if
 
   call mpi_allreduce(localbnorm, bnorm, 1, MPI_DOUBLE_PRECISION, &
-       MPI_SUM, MPI_COMM_WORLD, ierr)
+       MPI_SUM, comm, ierr)
 
    bnorm = sqrt(bnorm)
 
@@ -251,7 +251,7 @@ program cfd
         end if
 
         call mpi_allreduce(localerror, error, 1, MPI_DOUBLE_PRECISION, &
-                           MPI_SUM, MPI_COMM_WORLD, ierr)
+                           MPI_SUM, comm, ierr)
 
         error = sqrt(error)
         
