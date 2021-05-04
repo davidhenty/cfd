@@ -47,7 +47,10 @@ int main(int argc, char **argv)
 
 
   //do we stop because of tolerance?
-  if (tolerance > 0) {checkerr=1;}
+  if (tolerance > 0)
+    {
+      checkerr = 1;
+    }
 
   comm=MPI_COMM_WORLD;
 
@@ -71,32 +74,32 @@ int main(int argc, char **argv)
       numiter=atoi(argv[2]);
 
       if (argc == 4)
-	{
-	  re=atof(argv[3]);
-	  irrotational=0;
-	}
+        {
+          re=atof(argv[3]);
+          irrotational=0;
+        }
       else
-	{
-	  re=-1.0;
-	}
-	
+        {
+          re=-1.0;
+        }
+ 
       if(!checkerr)
-	{
-	  printf("Scale Factor = %i, iterations = %i\n",scalefactor, numiter);
-	}
+        {
+          printf("Scale Factor = %i, iterations = %i\n",scalefactor, numiter);
+        }
       else
-	{
-	  printf("Scale Factor = %i, iterations = %i, tolerance= %g\n",scalefactor,numiter,tolerance);
-	}
+        {
+          printf("Scale Factor = %i, iterations = %i, tolerance= %g\n",scalefactor,numiter,tolerance);
+        }
 
       if (irrotational)
-	{
-	  printf("Irrotational flow\n");
-	}
+        {
+          printf("Irrotational flow\n");
+        }
       else
-	{
-	  printf("Reynolds number = %f\n",re);
-	}
+        {
+          printf("Reynolds number = %f\n",re);
+        }
     }
 
 
@@ -122,9 +125,9 @@ int main(int argc, char **argv)
   if (size*lm != m)
     {
       if (rank == 0)
-	{
-	  printf("ERROR: m=%d does not divide onto %d processes\n", m, size);
-	}
+        {
+          printf("ERROR: m=%d does not divide onto %d processes\n", m, size);
+        }
       MPI_Finalize();
       return -1;
     }
@@ -143,9 +146,9 @@ int main(int argc, char **argv)
   for (i=0;i<lm+2;i++)
     {
       for(j=0;j<n+2;j++)
-	{
-	  psi[i][j]=0.;
-	}
+        {
+          psi[i][j]=0.;
+        }
     }
 
   if (!irrotational)
@@ -158,12 +161,12 @@ int main(int argc, char **argv)
       //zero the zeta array
 
       for (i=0;i<lm+2;i++)
-	{
-	  for(j=0;j<n+2;j++)
-	    {
-	      zet[i][j]=0.;
-	    }
-	}
+        {
+          for(j=0;j<n+2;j++)
+            {
+              zet[i][j]=0.;
+            }
+        }
     }
   
   //set the psi boundary conditions
@@ -177,9 +180,9 @@ int main(int argc, char **argv)
   for (i=0;i<lm+2;i++)
     {
       for (j=0;j<n+2;j++)
-	{
-	  localbnorm += psi[i][j]*psi[i][j];
-	}
+        {
+          localbnorm += psi[i][j]*psi[i][j];
+        }
     }
 
   //boundary swap of psi
@@ -194,12 +197,12 @@ int main(int argc, char **argv)
       //update normalisation
 
       for (i=0;i<lm+2;i++)
-	{
-	  for (j=0;j<n+2;j++)
-	    {
-	      localbnorm += zet[i][j]*zet[i][j];
-	    }
-	}
+        {
+          for (j=0;j<n+2;j++)
+            {
+              localbnorm += zet[i][j]*zet[i][j];
+            }
+        }
 
       //boundary swap zeta
       haloswap(zet,lm,n,comm);
@@ -225,94 +228,106 @@ int main(int argc, char **argv)
 
   for(iter=1;iter<=numiter;iter++)
     {
-      //calculate psi for next iteration
+      //do a boundary swap
+
+
+#pragma omp parallel
+      {
+        
+      haloswap(psi,lm,n,comm);
 
       if (irrotational)
-	{
-	  jacobistep(psitmp,psi,lm,n);
-	}
+        {
+          jacobistep(psitmp,psi,lm,n,2,n-1);
+        }
       else
-	{
-	  jacobistepvort(zettmp,psitmp,zet,psi,lm,n,re);
-	}
+        {
+          jacobistepvort(zettmp,psitmp,zet,psi,lm,n,re);
+        }
+
+      //do a boundary swap
+
+      // haloswap(psi,lm,n,comm);
+
+      if (!irrotational)
+        {
+          haloswap(zet,lm,n,comm);
+          boundaryzet(zet,psi,lm,n,comm);
+        }
+
+      if (irrotational)
+        {
+          jacobistep(psitmp,psi,lm,n,1,1);
+          jacobistep(psitmp,psi,lm,n,n,n);
+        }
 
       //calculate current error if required
 
       if (checkerr || iter == numiter)
-	{
-	  localerror = deltasq(psitmp,psi,lm,n);
+        {
+          localerror = deltasq(psitmp,psi,lm,n);
 
-	  if(!irrotational)
-	    {
-	      localerror += deltasq(zettmp,zet,lm,n);
-	    }
+          if(!irrotational)
+            {
+              localerror += deltasq(zettmp,zet,lm,n);
+            }
 
-	  MPI_Allreduce(&localerror,&error,1,MPI_DOUBLE,MPI_SUM,comm);
-	  error=sqrt(error);
-	  error=error/bnorm;
-	}
+          MPI_Allreduce(&localerror,&error,1,MPI_DOUBLE,MPI_SUM,comm);
+          error=sqrt(error);
+          error=error/bnorm;
+        }
 
       //quit early if we have reached required tolerance
 
       if (checkerr)
-	{
-	  if (error < tolerance)
-	    {
-	      if (rank == 0)
-		{
-		  printf("Converged on iteration %d\n",iter);
-		}
-	      break;
-	    }
-	}
+        {
+          if (error < tolerance)
+            {
+              if (rank == 0)
+                {
+                  printf("Converged on iteration %d\n",iter);
+                }
+              break;
+            }
+        }
 
       //copy back
 
       for(i=1;i<=lm;i++)
-	{
-	  for(j=1;j<=n;j++)
-	    {
-	      psi[i][j]=psitmp[i][j];
-	    }
-	}
+        {
+          for(j=1;j<=n;j++)
+            {
+              psi[i][j]=psitmp[i][j];
+            }
+        }
 
       if (!irrotational)
-	{
-	  for(i=1;i<=lm;i++)
-	    {
-	      for(j=1;j<=n;j++)
-		{
-		  zet[i][j]=zettmp[i][j];
-		}
-	    }
-	}
-
-      //do a boundary swap
-
-      haloswap(psi,lm,n,comm);
-
-      if (!irrotational)
-	{
-	  haloswap(zet,lm,n,comm);
-	  boundaryzet(zet,psi,lm,n,comm);
-	}
+        {
+          for(i=1;i<=lm;i++)
+            {
+              for(j=1;j<=n;j++)
+                {
+                  zet[i][j]=zettmp[i][j];
+                }
+            }
+        }
 
       //print loop information
 
       if(iter%printfreq == 0)
-	{
-	  if (rank==0)
-	    {
-	      if (!checkerr)
-		{
-		  printf("Completed iteration %d\n",iter);
-		}
-	      else
-		{
-		  printf("Completed iteration %d, error = %g\n",iter,error);
-		}
-	    }
-	}
+        {
+          if (rank==0)
+            {
+              if (!checkerr)
+                {
+                  printf("Completed iteration %d\n",iter);
+                }
+              else
+                {
+                  printf("Completed iteration %d, error = %g\n",iter,error);
+                }
+            }
+        }
     }
 
   if (iter > numiter) iter=numiter;
