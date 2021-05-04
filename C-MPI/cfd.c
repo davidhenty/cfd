@@ -232,17 +232,11 @@ int main(int argc, char **argv)
 
       if (irrotational)
         {
-          jacobistep(psitmp,psi,lm,n,2,n-1);
+          jacobistep(psitmp,psi,lm,n);
         }
       else
         {
           jacobistepvort(zettmp,psitmp,zet,psi,lm,n,re);
-        }
-
-      if (irrotational)
-        {
-          jacobistep(psitmp,psi,lm,n,1,1);
-          jacobistep(psitmp,psi,lm,n,n,n);
         }
 
       //calculate current error if required
