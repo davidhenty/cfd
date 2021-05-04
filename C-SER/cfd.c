@@ -39,7 +39,10 @@ int main(int argc, char **argv)
   double tstart, tstop, ttot, titer;
 
   //do we stop because of tolerance?
-  if (tolerance > 0) {checkerr=1;}
+  if (tolerance > 0)
+    {
+      checkerr = 1;
+    }
 
   //check command line parameters and parse them
 
