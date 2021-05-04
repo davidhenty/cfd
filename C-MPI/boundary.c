@@ -137,3 +137,34 @@ void haloswap(double **x, int m, int n, MPI_Comm comm)
 	}
     }
 }
+
+static MPI_Request requests[4];
+static MPI_Status  statuses[4];
+
+void haloswapinit(double **x, int m, int n, MPI_Comm comm)
+{
+
+  int rank, size, up, dn;
+  int tag=1;
+
+  MPI_Status status;
+
+  MPI_Comm_rank(comm,&rank);
+  MPI_Comm_size(comm,&size);
+
+  up = rank+1;
+  if (up > size-1) up = MPI_PROC_NULL;
+
+  dn = rank-1;
+  if (dn < 0) dn = MPI_PROC_NULL;
+
+  MPI_Irecv(&x[0][1]  ,n,MPI_DOUBLE,dn,tag,comm,&requests[0]);
+  MPI_Irecv(&x[m+1][1],n,MPI_DOUBLE,up,tag,comm,&requests[1]);
+  MPI_Isend(&x[m][1],  n,MPI_DOUBLE,up,tag,comm,&requests[2]);
+  MPI_Isend(&x[1][1],  n,MPI_DOUBLE,dn,tag,comm,&requests[3]);
+}
+
+void haloswapwait()
+{
+  MPI_Waitall(4, requests, statuses);
+}

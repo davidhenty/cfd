@@ -10,6 +10,8 @@
 #include "jacobi.h"
 #include "cfdio.h"
 
+void printarray(int rank, double **x, int m, int n);
+
 int main(int argc, char **argv)
 {
   int printfreq=1000; //output frequency
@@ -32,6 +34,14 @@ int main(int argc, char **argv)
   int wbase=5;
   int mbase=32;
   int nbase=32;
+
+  /*  int bbase=4;
+  int hbase=3;
+  int wbase=2;
+  int mbase=8;
+  int nbase=8; */
+
+  
 
   int irrotational = 1, checkerr = 0;
 
@@ -230,13 +240,34 @@ int main(int argc, char **argv)
     {
       //do a boundary swap
 
+      /*      for (i=0; i < size; i++)
+        {
+          if (rank == i) printarray(rank, psi, lm, n);
+          fflush(stdout);
+
+          MPI_Barrier(comm);
+          } */
+
+      haloswapinit(psi,lm,n,comm);
+
       if (irrotational)
         {
-          jacobistep(psitmp,psi,lm,n);
+          jacobistep(psitmp,psi,lm,n,2,lm-1);
         }
       else
         {
           jacobistepvort(zettmp,psitmp,zet,psi,lm,n,re);
+        }
+
+      haloswapwait();
+
+      jacobistep(psitmp,psi,lm,n,1,1);
+      jacobistep(psitmp,psi,lm,n,lm,lm);
+
+      if (!irrotational)
+        {
+          haloswap(zet,lm,n,comm);
+          boundaryzet(zet,psi,lm,n,comm);
         }
 
       //calculate current error if required
@@ -290,18 +321,6 @@ int main(int argc, char **argv)
             }
         }
 
-      //do a boundary swap
-
-      haloswap(psi,lm,n,comm);
-
-      if (!irrotational)
-        {
-          haloswap(zet,lm,n,comm);
-          boundaryzet(zet,psi,lm,n,comm);
-        }
-
-      //print loop information
-
       if(iter%printfreq == 0)
         {
           if (rank==0)
@@ -322,6 +341,18 @@ int main(int argc, char **argv)
 
   MPI_Barrier(comm);
   tstop=MPI_Wtime();
+
+  //do a boundary swap so we can compute velocities correctly
+
+  haloswap(psi,lm,n,comm);
+
+  if (!irrotational)
+    {
+      haloswap(zet,lm,n,comm);
+      boundaryzet(zet,psi,lm,n,comm);
+    }
+
+  //print loop information
 
   ttot=tstop-tstart;
   titer=ttot/(double)iter;
@@ -360,4 +391,20 @@ int main(int argc, char **argv)
     }
 
   return 0;
+}
+
+void printarray(int rank, double **x, int m, int n)
+{
+  int i, j;
+
+  for (j=n+1; j >=0; j--)
+    {
+      printf("rank %d:", rank);
+      
+      for (i=0; i < m+2; i++)
+        {
+          printf(" %10.6g", x[i][j]);
+        }
+      printf("\n");
+    }
 }
