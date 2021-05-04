@@ -230,12 +230,6 @@ int main(int argc, char **argv)
     {
       //do a boundary swap
 
-
-#pragma omp parallel
-      {
-        
-      haloswap(psi,lm,n,comm);
-
       if (irrotational)
         {
           jacobistep(psitmp,psi,lm,n,2,n-1);
@@ -243,16 +237,6 @@ int main(int argc, char **argv)
       else
         {
           jacobistepvort(zettmp,psitmp,zet,psi,lm,n,re);
-        }
-
-      //do a boundary swap
-
-      // haloswap(psi,lm,n,comm);
-
-      if (!irrotational)
-        {
-          haloswap(zet,lm,n,comm);
-          boundaryzet(zet,psi,lm,n,comm);
         }
 
       if (irrotational)
@@ -310,6 +294,16 @@ int main(int argc, char **argv)
                   zet[i][j]=zettmp[i][j];
                 }
             }
+        }
+
+      //do a boundary swap
+
+      haloswap(psi,lm,n,comm);
+
+      if (!irrotational)
+        {
+          haloswap(zet,lm,n,comm);
+          boundaryzet(zet,psi,lm,n,comm);
         }
 
       //print loop information
