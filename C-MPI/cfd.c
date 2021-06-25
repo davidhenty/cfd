@@ -228,8 +228,6 @@ int main(int argc, char **argv)
 
   for(iter=1;iter<=numiter;iter++)
     {
-      //do a boundary swap
-
       if (irrotational)
         {
           jacobistep(psitmp,psi,lm,n);
@@ -253,20 +251,6 @@ int main(int argc, char **argv)
           MPI_Allreduce(&localerror,&error,1,MPI_DOUBLE,MPI_SUM,comm);
           error=sqrt(error);
           error=error/bnorm;
-        }
-
-      //quit early if we have reached required tolerance
-
-      if (checkerr)
-        {
-          if (error < tolerance)
-            {
-              if (rank == 0)
-                {
-                  printf("Converged on iteration %d\n",iter);
-                }
-              break;
-            }
         }
 
       //copy back
@@ -298,6 +282,20 @@ int main(int argc, char **argv)
         {
           haloswap(zet,lm,n,comm);
           boundaryzet(zet,psi,lm,n,comm);
+        }
+
+      //quit early if we have reached required tolerance
+
+      if (checkerr)
+        {
+          if (error < tolerance)
+            {
+              if (rank == 0)
+                {
+                  printf("Converged on iteration %d\n",iter);
+                }
+              break;
+            }
         }
 
       //print loop information
