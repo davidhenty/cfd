@@ -202,15 +202,6 @@ program cfd
 
      end if
 
-!  Quit early if we have reached required tolerance
-
-     if (checkerr) then
-        if (error .lt. tolerance) then
-           write(*,*) 'CONVERGED iteration ', iter, ': terminating'
-           exit
-        end if
-     end if
-
 !  Copy back
 
 !$omp parallel workshare
@@ -231,6 +222,15 @@ program cfd
 
         call boundaryzet(zet, psi, m, n)
         
+     end if
+
+!  Quit early if we have reached required tolerance
+
+     if (checkerr) then
+        if (error .lt. tolerance) then
+           write(*,*) 'CONVERGED iteration ', iter, ': terminating'
+           exit
+        end if
      end if
 
 !  End iterative Jacobi loop

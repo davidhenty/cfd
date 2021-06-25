@@ -194,17 +194,6 @@ int main(int argc, char **argv)
 	  error=error/bnorm;
 	}
 
-      //quit early if we have reached required tolerance
-
-      if (checkerr)
-	{
-	  if (error < tolerance)
-	    {
-	      printf("Converged on iteration %d\n",iter);
-	      break;
-	    }
-	}
-
       //copy back
 
       for(i=1;i<=m;i++)
@@ -230,6 +219,17 @@ int main(int argc, char **argv)
 	{
 	  //update zeta BCs that depend on psi
 	  boundaryzet(zet,psi,m,n);
+	}
+
+      //quit early if we have reached required tolerance
+
+      if (checkerr)
+	{
+	  if (error < tolerance)
+	    {
+	      printf("Converged on iteration %d\n",iter);
+	      break;
+	    }
 	}
 
       //print loop information
