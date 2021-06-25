@@ -1,14 +1,33 @@
+# Set the target system
+# Can use one of this list: archer, cirrus or linux
+
+SYSTEM=archer
+
 # System dependent definitions
 
-# For ARCHER
-CC=	cc
-CFLAGS=
-LFLAGS=
+# For ARCHER - default
 
-# For Cirrus or any standard Linux system
-#CC=	icc
-#CFLAGS=	-qopenmp -O3
-#LFLAGS=	-lm
+ifeq ($(SYSTEM), archer)
+CC=	cc
+CFLAGS=	-h omp
+LFLAGS=
+endif
+
+# For Cirrus using Intel compilers
+
+ifeq ($(SYSTEM), cirrus)
+CC=	icc
+CFLAGS=	-qopenmp -O3
+LFLAGS=	-lm
+endif
+
+# For a standard Linux cluster using GNU compilers
+
+ifeq ($(SYSTEM), linux)
+CC=	gcc
+CFLAGS=	-fopenmp -O3
+LFLAGS=	-lm
+endif
 
 # System independent definitions
 
