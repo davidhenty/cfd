@@ -1,15 +1,33 @@
+# Set the target system
+# Can use one of this list: archer, cirrus or linux
+
+SYSTEM=archer
+
 # System dependent definitions
 
-# For ARCHER
+# For ARCHER - default
+
+ifeq ($(SYSTEM), archer)
 FC=	ftn
-FFLAGS=	-g
+FFLAGS=
 LFLAGS=
+endif
 
-# For Cirrus or any standard Linux system
-#FC=	mpif90
-#FFLAGS=	-O3
-#LFLAGS=
+# For Cirrus using Intel compilers
 
+ifeq ($(SYSTEM), cirrus)
+FC=	mpif90
+FFLAGS=	-fc=ifort -O3
+LFLAGS=
+endif
+
+# For a standard Linux cluster using GNU compilers
+
+ifeq ($(SYSTEM), linux)
+FC=	mpif90
+FFLAGS=	-O3
+LFLAGS=
+endif
 
 # System independent definitions
 
