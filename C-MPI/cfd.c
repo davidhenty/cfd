@@ -5,6 +5,10 @@
 
 #include <mpi.h>
 
+#ifdef OLAPOMP
+#include <omp.h>
+#endif
+
 #include "arraymalloc.h"
 #include "boundary.h"
 #include "jacobi.h"
@@ -42,6 +46,9 @@ int main(int argc, char **argv)
   int nbase=8; */
 
   
+#ifdef OLAPOMP
+  int ithread, nthread;
+#endif
 
   int irrotational = 1, checkerr = 0;
 
@@ -69,13 +76,30 @@ int main(int argc, char **argv)
   MPI_Comm_rank(comm,&rank);
   MPI_Comm_size(comm,&size);
 
+#ifdef OLAPOMP
+#pragma omp parallel
+  {
+    #pragma omp single
+    {
+      nthread = omp_get_num_threads();
+    }
+  }
+
+  if (nthread != 2)
+    {
+      if (rank == 0) printf("ERROR: nthread = %d; must use 2!\n", nthread);
+      MPI_Finalize();
+      return 1;
+    }
+#endif
+
   //check command line parameters and parse them
 
-  if (argc <3|| argc >4)
+  if (argc <2|| argc >3)
     {
-      if (rank == 0) printf("Usage: cfd <scale> <numiter> [reynolds]\n");
+      if (rank == 0) printf("Usage: cfd <scale> <numiter>\n");
       MPI_Finalize();
-      return 0;
+      return 1;
     }
 
   if (rank == 0)
@@ -83,16 +107,8 @@ int main(int argc, char **argv)
       scalefactor=atoi(argv[1]);
       numiter=atoi(argv[2]);
 
-      if (argc == 4)
-        {
-          re=atof(argv[3]);
-          irrotational=0;
-        }
-      else
-        {
-          re=-1.0;
-        }
- 
+      re=-1.0;
+
       if(!checkerr)
         {
           printf("Scale Factor = %i, iterations = %i\n",scalefactor, numiter);
@@ -110,6 +126,15 @@ int main(int argc, char **argv)
         {
           printf("Reynolds number = %f\n",re);
         }
+#if defined(OLAPMPI)
+      printf("Overlapping comms and calc with MPI\n");
+#elif defined(OLAPOMP)
+      printf("Overlapping comms and calc with OpenMP\n");
+#pragma omp parallel
+      printf("Number of threads = %d\n", omp_get_num_threads());
+#else
+      printf("NOT overlapping comms and calc\n");
+#endif
     }
 
 
@@ -236,18 +261,43 @@ int main(int argc, char **argv)
 
   tstart=MPI_Wtime();
 
+#ifdef OLAPOMP
+#pragma omp parallel private(ithread, iter)
+{
+  ithread = omp_get_thread_num();
+#endif    
   for(iter=1;iter<=numiter;iter++)
     {
       //do a boundary swap
 
-      /*      for (i=0; i < size; i++)
+#if defined(OLAPOMP)
+
+      #pragma omp barrier
+      
+      if (ithread == 1)
         {
-          if (rank == i) printarray(rank, psi, lm, n);
-          fflush(stdout);
+          haloswapinit(psi,lm,n,comm);
+          haloswapwait();
+        }
+      else
+        {
+          if (irrotational)
+            {
+              jacobistep(psitmp,psi,lm,n,2,lm-1);
+            }
+          else
+            {
+              jacobistepvort(zettmp,psitmp,zet,psi,lm,n,re);
+            }
+        }
+#pragma omp barrier
 
-          MPI_Barrier(comm);
-          } */
+      if (ithread == 0)
+      {
+      jacobistep(psitmp,psi,lm,n,1,1);
+      jacobistep(psitmp,psi,lm,n,lm,lm);
 
+#elif defined(OLAPMPI)
       haloswapinit(psi,lm,n,comm);
 
       if (irrotational)
@@ -264,11 +314,19 @@ int main(int argc, char **argv)
       jacobistep(psitmp,psi,lm,n,1,1);
       jacobistep(psitmp,psi,lm,n,lm,lm);
 
-      if (!irrotational)
+#else
+      haloswapinit(psi,lm,n,comm);
+      haloswapwait();
+
+      if (irrotational)
         {
-          haloswap(zet,lm,n,comm);
-          boundaryzet(zet,psi,lm,n,comm);
+          jacobistep(psitmp,psi,lm,n,1,lm);
         }
+      else
+        {
+          jacobistepvort(zettmp,psitmp,zet,psi,lm,n,re);
+        }
+#endif
 
       //calculate current error if required
 
@@ -296,7 +354,7 @@ int main(int argc, char **argv)
                 {
                   printf("Converged on iteration %d\n",iter);
                 }
-              break;
+              //              break;
             }
         }
 
@@ -335,7 +393,13 @@ int main(int argc, char **argv)
                 }
             }
         }
-    }
+#ifdef OLAPOMP
+      } // omp master
+#endif
+    } // iter
+#ifdef OLAPOMP
+} // parallel
+#endif
 
   if (iter > numiter) iter=numiter;
 
@@ -369,9 +433,9 @@ int main(int argc, char **argv)
 
   //output results
 
-  writedatafiles(psi,lm,n, scalefactor,comm);
+  //  writedatafiles(psi,lm,n, scalefactor,comm);
 
-  if (rank == 0) writeplotfile(m,n,scalefactor);
+  //  if (rank == 0) writeplotfile(m,n,scalefactor);
 
   //free un-needed arrays
   free(psi);
