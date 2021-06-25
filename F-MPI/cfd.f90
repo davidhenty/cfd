@@ -260,16 +260,6 @@ program cfd
 
      end if
 
-!  Quit early if we have reached required tolerance
-
-     if (checkerr) then
-        if (error .lt. tolerance) then
-           if (rank == 0) write(*,*) 'CONVERGED iteration ', iter, &
-                                     ': terminating'
-           exit
-        end if
-     end if
-
 !  Copy back
 
      psi(1:m, 1:ln) = psitmp(1:m, 1:ln)
@@ -292,6 +282,16 @@ program cfd
 
         call boundaryzet(zet, psi, m, ln, comm)
         
+     end if
+
+!  Quit early if we have reached required tolerance
+
+     if (checkerr) then
+        if (error .lt. tolerance) then
+           if (rank == 0) write(*,*) 'CONVERGED iteration ', iter, &
+                                     ': terminating'
+           exit
+        end if
      end if
 
 !  End iterative Jacobi loop
