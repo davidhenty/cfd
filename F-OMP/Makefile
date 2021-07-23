@@ -8,8 +8,8 @@ SYSTEM=archer
 # For ARCHER - default
 
 ifeq ($(SYSTEM), archer)
-FC=	ftn -h omp
-FFLAGS=
+FC=	ftn
+FFLAGS=	-O3 -h omp
 LFLAGS=
 endif
 

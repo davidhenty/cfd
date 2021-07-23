@@ -1,7 +1,7 @@
 # Set the target system
 # Can use one of this list: archer, cirrus or linux
 
-SYSTEM=archer
+SYSTEM=linux
 
 # System dependent definitions
 
@@ -9,7 +9,7 @@ SYSTEM=archer
 
 ifeq ($(SYSTEM), archer)
 CC=	cc
-CFLAGS=
+CFLAGS=	-O3
 LFLAGS=
 endif
 

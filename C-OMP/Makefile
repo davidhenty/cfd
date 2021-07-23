@@ -9,7 +9,7 @@ SYSTEM=archer
 
 ifeq ($(SYSTEM), archer)
 CC=	cc
-CFLAGS=	-h omp
+CFLAGS=	-O3 -h omp
 LFLAGS=
 endif
 
