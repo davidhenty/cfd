@@ -22,7 +22,7 @@ def main(argv):
 
     # Test we have the correct number of arguments
     if len(argv) < 2:
-        sys.stdout.write("Usage: cfd.py <scalefactor> <iterations>")
+        sys.stdout.write("Usage: cfd.py <scalefactor> <iterations>\n")
         sys.exit(1)
         
     # Get the systen parameters from the arguments
