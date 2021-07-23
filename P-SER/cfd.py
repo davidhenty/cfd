@@ -54,7 +54,7 @@ def main(argv):
     sys.stdout.write("\nGrid size = {0} x {1}\n".format(m, n))
     
     # Define the psi array of dimension [m+2][n+2] and set it to zero
-    psi = [[0 for col in range(n+2)] for row in range(m+2)]
+    psi = [[0.0 for col in range(n+2)] for row in range(m+2)]
 
     # Set the boundary conditions on bottom edge
     for i in range(b+1, b+w):
