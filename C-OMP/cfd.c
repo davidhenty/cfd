@@ -11,7 +11,7 @@
 
 int main(int argc, char **argv)
 {
-  int printfreq=100; //output frequency
+  int printfreq=1000; //output frequency
   double error, bnorm;
   double tolerance=0.0; //tolerance for convergence. <=0 means do not check
 
@@ -104,14 +104,12 @@ int main(int argc, char **argv)
   psi    = (double **) arraymalloc2d(m+2,n+2,sizeof(double));
   psitmp = (double **) arraymalloc2d(m+2,n+2,sizeof(double));
 
-  //zero the psi arrays
-#pragma omp parallel for default(none) private(i,j) shared(psi,psitmp,m,n)
-  for (i=1;i<=m;i++)
+  //zero the psi array
+  for (i=0;i<m+2;i++)
     {
-      for(j=1;j<=n;j++)
+      for(j=0;j<n+2;j++)
 	{
-	  psi[i][j]   =0.0;
-	  psitmp[i][j]=0.0;
+	  psi[i][j]=0.0;
 	}
     }
 
@@ -122,15 +120,13 @@ int main(int argc, char **argv)
       zet =   (double **) arraymalloc2d(m+2,n+2,sizeof(double));
       zettmp =(double **) arraymalloc2d(m+2,n+2,sizeof(double));
 
-      //zero the zeta arrays
+      //zero the zeta array
 
-#pragma omp parallel for default(none) private(i,j) shared(zet,zettmp,m,n)
-      for (i=1;i<=m;i++)
+      for (i=0;i<m+2;i++)
 	{
-	  for(j=1;j<=n;j++)
+	  for(j=0;j<n+2;j++)
 	    {
-	      zet[i][j]   =0.0;
-	      zettmp[i][j]=0.0;
+	      zet[i][j]=0.0;
 	    }
 	}
     }
@@ -275,9 +271,9 @@ int main(int argc, char **argv)
 
   //output results
 
-  // writedatafiles(psi,m,n, scalefactor);
+  writedatafiles(psi,m,n, scalefactor);
 
-  // writeplotfile(m,n,scalefactor);
+  writeplotfile(m,n,scalefactor);
 
   //free un-needed arrays
   free(psi);
