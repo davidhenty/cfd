@@ -5,7 +5,11 @@
 #include "cfdio.h"
 #include "arraymalloc.h"
 
+#ifndef USEVLA
 void writedatafiles( int m, int n, double **psi, int scale)
+#else
+void writedatafiles( int m, int n, double psi[m+2][n+2], int scale)
+#endif
 {
   typedef double vecvel[2];
   typedef int    vecrgb[3];
