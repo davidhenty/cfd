@@ -2,7 +2,7 @@
 
 #include "jacobi.h"
 
-void jacobistep(double **psinew, double **psi, int m, int n)
+void jacobistep(int m, int n, double **psinew, double **psi)
 {
   int i, j;
 
@@ -15,9 +15,10 @@ void jacobistep(double **psinew, double **psi, int m, int n)
     }
 }
 
-void jacobistepvort(double **zetnew, double **psinew,
-		    double **zet, double **psi,
-		    int m, int n, double re)
+void jacobistepvort(int m, int n,
+                    double **zetnew, double **psinew,
+		    double **zet,    double **psi,
+		    double re)
 {
   int i, j;
 
@@ -43,7 +44,7 @@ void jacobistepvort(double **zetnew, double **psinew,
     }
 }
 
-double deltasq(double **newarr, double **oldarr, int m, int n)
+double deltasq(int m, int n, double **newarr, double **oldarr)
 {
   int i, j;
 

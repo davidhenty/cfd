@@ -128,7 +128,7 @@ int main(int argc, char **argv)
   
   //set the psi boundary conditions
 
-  boundarypsi(psi,m,n,b,h,w);
+  boundarypsi(m,n,psi,b,h,w);
 
   //compute normalisation factor for error
 
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
   if (!irrotational)
     {
       //update zeta BCs that depend on psi
-      boundaryzet(zet,psi,m,n);
+      boundaryzet(m,n,zet,psi);
 
       //update normalisation
 
@@ -172,22 +172,22 @@ int main(int argc, char **argv)
 
       if (irrotational)
 	{
-	  jacobistep(psitmp,psi,m,n);
+	  jacobistep(m,n,psitmp,psi);
 	}
       else
 	{
-	  jacobistepvort(zettmp,psitmp,zet,psi,m,n,re);
+	  jacobistepvort(m,n,zettmp,psitmp,zet,psi,re);
 	}
 
       //calculate current error if required
 
       if (checkerr || iter == numiter)
 	{
-	  error = deltasq(psitmp,psi,m,n);
+	  error = deltasq(m,n,psitmp,psi);
 
 	  if(!irrotational)
 	    {
-	      error += deltasq(zettmp,zet,m,n);
+	      error += deltasq(m,n,zettmp,zet);
 	    }
 
 	  error=sqrt(error);
@@ -218,7 +218,7 @@ int main(int argc, char **argv)
       if (!irrotational)
 	{
 	  //update zeta BCs that depend on psi
-	  boundaryzet(zet,psi,m,n);
+	  boundaryzet(m,n,zet,psi);
 	}
 
       //quit early if we have reached required tolerance
@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 
   //output results
 
-  writedatafiles(psi,m,n, scalefactor);
+  writedatafiles(m,n,psi,scalefactor);
 
   writeplotfile(m,n,scalefactor);
 
