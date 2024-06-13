@@ -3,7 +3,7 @@
 
 //grid is parallelised in the x direction
 
-void boundarypsi(double **psi, int m, int n, int b, int h, int w)
+void boundarypsi(int m, int n, double **psi, int b, int h, int w)
 {
 
   int i,j;
@@ -12,28 +12,28 @@ void boundarypsi(double **psi, int m, int n, int b, int h, int w)
 
   for (i=b+1;i<=b+w-1;i++)
     {
-      psi[i][0] = (float)(i-b);
+      psi[i][0] = (double)(i-b);
     }
 
   for (i=b+w;i<=m;i++)
     {
-      psi[i][0] = (float)(w);
+      psi[i][0] = (double)(w);
     }
 
   //BCS on RHS
 
   for (j=1; j <= h; j++)
     {
-      psi[m+1][j] = (float) w;
+      psi[m+1][j] = (double) w;
     }
 
   for (j=h+1;j<=h+w-1; j++)
     {
-      psi[m+1][j]=(float)(w-j+h);
+      psi[m+1][j]=(double)(w-j+h);
     }
 }
 
-void boundaryzet(double **zet, double **psi, int m, int n)
+void boundaryzet(int m, int n, double **zet, double **psi)
 {
   int i,j;
 

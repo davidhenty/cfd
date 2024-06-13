@@ -1,4 +1,4 @@
-void writedatafiles(double **psi, int m, int n, int scale);
+void writedatafiles( int m, int n, double **psi, int scale);
 
 void writeplotfile(int m, int n, int scale);
 
