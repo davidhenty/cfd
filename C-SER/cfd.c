@@ -13,10 +13,12 @@ int main(int argc, char **argv)
   double error, bnorm;
   double tolerance=0.0; //tolerance for convergence. <=0 means do not check
 
+#ifndef USEVLA
   //main arrays
   double **psi, **zet;
   //temporary versions of main arrays
   double **psitmp, **zettmp;
+#endif
 
   //command line arguments
   int scalefactor, numiter;
@@ -96,8 +98,15 @@ int main(int argc, char **argv)
 
   //allocate arrays
 
+#ifndef USEVLA
   psi    = (double **) arraymalloc2d(m+2,n+2,sizeof(double));
   psitmp = (double **) arraymalloc2d(m+2,n+2,sizeof(double));
+#else
+  double psi[m+2][n+2];
+  double psitmp[m+2][n+2];
+  double zet[m+2][n+2];
+  double zettmp[m+2][n+2];
+#endif
 
   //zero the psi array
   for (i=0;i<m+2;i++)
@@ -112,8 +121,10 @@ int main(int argc, char **argv)
     {
       //allocate arrays
 
+#ifndef USEVLA
       zet =   (double **) arraymalloc2d(m+2,n+2,sizeof(double));
       zettmp =(double **) arraymalloc2d(m+2,n+2,sizeof(double));
+#endif
 
       //zero the zeta array
 
@@ -268,6 +279,7 @@ int main(int argc, char **argv)
 
   writeplotfile(m,n,scalefactor);
 
+#ifndef USEVLA
   //free un-needed arrays
   free(psi);
   free(psitmp);
@@ -277,6 +289,7 @@ int main(int argc, char **argv)
       free(zet);
       free(zettmp);
     }
+#endif
 
   printf("... finished\n");
 
