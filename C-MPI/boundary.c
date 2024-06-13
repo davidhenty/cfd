@@ -5,7 +5,7 @@
 
 //grid is parallelised in the x direction
 
-void boundarypsi(double **psi, int m, int n,
+void boundarypsi(int m, int n, double **psi,
 		 int b, int h, int w, MPI_Comm comm)
 {
 
@@ -52,7 +52,7 @@ void boundarypsi(double **psi, int m, int n,
     }
 }
 
-void boundaryzet(double **zet, double **psi, int m, int n, MPI_Comm comm)
+void boundaryzet(int m, int n, double **zet, double **psi, MPI_Comm comm)
 {
   int size, rank, i,j;
 
@@ -87,10 +87,10 @@ void boundaryzet(double **zet, double **psi, int m, int n, MPI_Comm comm)
     }
 }
 
-void haloswap(double **x, int m, int n, MPI_Comm comm)
+void haloswap(int m, int n, double **x, MPI_Comm comm)
 {
   int rank, size;
-  int tag=1;
+  int tag = 1;
 
   MPI_Status status;
 

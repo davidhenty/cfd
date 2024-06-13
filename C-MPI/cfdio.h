@@ -1,6 +1,6 @@
 #include <mpi.h>
 
-void writedatafiles(double **psi, int m, int n, int scale, MPI_Comm comm);
+void writedatafiles(int m, int n, double **psi, int scale, MPI_Comm comm);
 
 void writeplotfile(int m, int n, int scale);
 

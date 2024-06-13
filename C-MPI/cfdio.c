@@ -5,7 +5,7 @@
 #include "cfdio.h"
 #include "arraymalloc.h"
 
-void writedatafiles(double **psi, int m, int n, int scale, MPI_Comm comm)
+void writedatafiles(int m, int n, double **psi, int scale, MPI_Comm comm)
 {
   typedef double Vecvel[2];
   typedef int    Vecrgb[3];

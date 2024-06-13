@@ -171,7 +171,7 @@ int main(int argc, char **argv)
   
   //set the psi boundary conditions
 
-  boundarypsi(psi,lm,n,b,h,w,comm);
+  boundarypsi(lm,n,psi,b,h,w,comm);
 
   //compute normalisation factor for error
 
@@ -187,12 +187,12 @@ int main(int argc, char **argv)
 
   //boundary swap of psi
 
-  haloswap(psi,lm,n,comm);
+  haloswap(lm,n,psi,comm);
 
   if (!irrotational)
     {
       //update zeta BCs that depend on psi
-      boundaryzet(zet,psi,lm,n,comm);
+      boundaryzet(lm,n,zet,psi,comm);
 
       //update normalisation
 
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
         }
 
       //boundary swap zeta
-      haloswap(zet,lm,n,comm);
+      haloswap(lm,n,zet,comm);
     }
 
   //get global bnorm
@@ -230,22 +230,22 @@ int main(int argc, char **argv)
     {
       if (irrotational)
         {
-          jacobistep(psitmp,psi,lm,n);
+          jacobistep(lm,n,psitmp,psi);
         }
       else
         {
-          jacobistepvort(zettmp,psitmp,zet,psi,lm,n,re);
+          jacobistepvort(lm,n,zettmp,psitmp,zet,psi,re);
         }
 
       //calculate current error if required
 
       if (checkerr || iter == numiter)
         {
-          localerror = deltasq(psitmp,psi,lm,n);
+          localerror = deltasq(lm,n,psitmp,psi);
 
           if(!irrotational)
             {
-              localerror += deltasq(zettmp,zet,lm,n);
+              localerror += deltasq(lm,n,zettmp,zet);
             }
 
           MPI_Allreduce(&localerror,&error,1,MPI_DOUBLE,MPI_SUM,comm);
@@ -276,12 +276,12 @@ int main(int argc, char **argv)
 
       //do a boundary swap
 
-      haloswap(psi,lm,n,comm);
+      haloswap(lm,n,psi,comm);
 
       if (!irrotational)
         {
-          haloswap(zet,lm,n,comm);
-          boundaryzet(zet,psi,lm,n,comm);
+          haloswap(lm,n,zet,comm);
+          boundaryzet(lm,n,zet,psi,comm);
         }
 
       //quit early if we have reached required tolerance
@@ -336,7 +336,7 @@ int main(int argc, char **argv)
 
   //output results
 
-  writedatafiles(psi,lm,n, scalefactor,comm);
+  writedatafiles(lm,n,psi,scalefactor,comm);
 
   if (rank == 0) writeplotfile(m,n,scalefactor);
 
