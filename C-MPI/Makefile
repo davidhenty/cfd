@@ -1,7 +1,7 @@
 # Set the target system
 # Can use one of this list: archer, cirrus or linux
 
-SYSTEM=linux
+SYSTEM=cirrus
 
 # System dependent definitions
 
@@ -17,7 +17,7 @@ endif
 
 ifeq ($(SYSTEM), cirrus)
 CC=	mpicc
-CFLAGS=	-cc=icc -O3
+CFLAGS=	-cc=icc -O3 -DUSEVLA
 LFLAGS=	-lm
 endif
 

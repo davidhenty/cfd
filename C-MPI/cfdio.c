@@ -5,13 +5,17 @@
 #include "cfdio.h"
 #include "arraymalloc.h"
 
+#ifndef USEVLA
 void writedatafiles(int m, int n, double **psi, int scale, MPI_Comm comm)
+#else
+void writedatafiles(int m, int n, double psi[m+2][n+2], int scale, MPI_Comm comm)
+#endif
 {
-  typedef double Vecvel[2];
-  typedef int    Vecrgb[3];
+  typedef double vecvel[2];
+  typedef int    vecrgb[3];
 
-  Vecvel **vel;
-  Vecrgb **rgb;
+  vecvel **vel;
+  vecrgb **rgb;
 
   double modvsq, hue;
   int size, rank, irank, i,j, ix, iy;
@@ -26,8 +30,8 @@ void writedatafiles(int m, int n, double **psi, int scale, MPI_Comm comm)
 
   if (rank==0) printf("\n\nWriting data files ...\n");
 
-  vel = (Vecvel **) arraymalloc2d(m,n,sizeof(Vecvel));
-  rgb = (Vecrgb **) arraymalloc2d(m,n,sizeof(Vecrgb));
+  vel = (vecvel **) arraymalloc2d(m,n,sizeof(vecvel));
+  rgb = (vecrgb **) arraymalloc2d(m,n,sizeof(vecrgb));
 
   //calculate velocities and hues
 
