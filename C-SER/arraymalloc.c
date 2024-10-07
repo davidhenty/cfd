@@ -48,7 +48,7 @@ void ***arraymalloc3d(int nx, int ny, int nz, size_t typesize)
 
   for (it=0; it < nxt; it++)
     {
-      array3d[it] = (void *) (array3d + nxt + nyt*it);
+      array3d[it] = (void **) (array3d + nxt + nyt*it);
 
       for (jt=0; jt < nyt; jt++)
       {
